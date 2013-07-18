@@ -54,14 +54,20 @@ public class RiemannReporter extends AbstractPollingReporter implements MetricPr
 
     @Override
     public void processMeter(MetricName name, Metered meter, Metric context) throws Exception {
-        sendEvent(buildEvent(String.format("%s mean", name.getName())).setMetricD(meter.meanRate()).build());
+        Proto.Event.Builder builder = buildEvent(String.format("%s mean", name.getName()));
+        Proto.Event event = builder.setMetricD(meter.meanRate())
+                .addAttributes(buildMetricTypeAttribute("meter"))
+                .build();
+        sendEvent(event);
     }
 
     @Override
     public void processCounter(MetricName name, Counter counter, Metric context) throws Exception {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format("Ignoring counter: %s", name.getName()));
-        }
+        Proto.Event.Builder builder = buildEvent(name.getName());
+        Proto.Event event = builder.setMetricSint64(counter.count())
+                .addAttributes(buildMetricTypeAttribute("counter"))
+                .build();
+        sendEvent(event);
     }
 
     @Override
@@ -73,21 +79,36 @@ public class RiemannReporter extends AbstractPollingReporter implements MetricPr
 
     @Override
     public void processTimer(MetricName name, Timer timer, Metric context) throws Exception {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format("Ignoring timer: %s", name.getName()));
-        }
+        Proto.Event.Builder builder = buildEvent(String.format("%s mean", name.getName()));
+        Proto.Event event = builder.setMetricD(timer.mean())
+                .addAttributes(buildMetricTypeAttribute("timer"))
+                .build();
+        sendEvent(event);
+
+        builder = buildEvent(String.format("%s one minute", name.getName()));
+        event = builder.setMetricD(timer.oneMinuteRate())
+                .addAttributes(buildMetricTypeAttribute("timer"))
+                .build();
+        sendEvent(event);
     }
 
     @Override
     public void processGauge(MetricName name, Gauge<?> gauge, Metric context) throws Exception {
+        Proto.Event.Builder builder = buildEvent(name.getName());
+        builder.addAttributes(buildMetricTypeAttribute("gauge"));
+
         if (gauge.value() instanceof Double) {
-            Proto.Event event = buildEvent(name.getName()).setMetricD((Double) gauge.value()).build();
+            Proto.Event event = builder.setMetricD((Double) gauge.value()).build();
             sendEvent(event);
         } else {
             Long longValue = Long.valueOf(gauge.value().toString());
-            Proto.Event event = buildEvent(name.getName()).setMetricSint64(longValue).build();
+            Proto.Event event = builder.setMetricSint64(longValue).build();
             sendEvent(event);
         }
+    }
+
+    private Proto.Attribute buildMetricTypeAttribute(String type) {
+        return Proto.Attribute.newBuilder().setKey("metricType").setValue(type).build();
     }
 
     private void sendEvent(Proto.Event event) throws IOException {
