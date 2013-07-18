@@ -23,8 +23,8 @@ public class RiemannTcpClientPublisher implements RiemannEventPublisher {
     }
 
     public static RiemannTcpClientPublisher buildFromProperties(VerifiableProperties props) throws IOException {
-        String host = props.getString("kafka.riemann.metrics.reporter.host", "127.0.0.1");
-        Integer port = props.getInt("kafka.riemann.metrics.reporter.port", 5555);
+        String host = props.getString("kafka.riemann.metrics.reporter.publisher.host", "127.0.0.1");
+        Integer port = props.getInt("kafka.riemann.metrics.reporter.publisher.port", 5555);
 
         RiemannTcpClientPublisher publisher = new RiemannTcpClientPublisher(RiemannClient.tcp(host, port));
         publisher.connect();
