@@ -3,12 +3,14 @@ Kafka includes support for automatically reporting various metrics (messages, by
 
 Events are created and published back to Kafka using a configured topic (`riemann_event` by default).
 
+[![Build Status](https://travis-ci.org/pingles/kafka-riemann-reporter.png)](https://travis-ci.org/pingles/kafka-riemann-reporter)
+
 ## Using
 
 Build the JAR and copy it to your Kafka install's `./libs` directory.
 
-$ mvn package
-$ cp target/kafka-riemann-reporter-0.1-SNAPSHOT-jar-with-dependencies.jar $KAFKA_HOME/libs
+    $ mvn package
+    $ cp target/kafka-riemann-reporter-0.1-SNAPSHOT-jar-with-dependencies.jar $KAFKA_HOME/libs
 
 Then edit the `server.properties` and set the following:
 
