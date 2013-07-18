@@ -41,11 +41,13 @@ public class RiemannReporter extends AbstractPollingReporter implements MetricPr
 
     @Override
     public void processMeter(MetricName name, Metered meter, Metric context) throws Exception {
-        Proto.Event.Builder builder = buildEvent(String.format("%s mean", name.getName()));
-        Proto.Event event = builder.setMetricD(meter.meanRate())
+        sendEvent(buildEvent(String.format("%s mean", name.getName())).setMetricD(meter.meanRate())
                 .addAttributes(buildMetricTypeAttribute("meter"))
-                .build();
-        sendEvent(event);
+                .build());
+
+        sendEvent(buildEvent(String.format("%s count", name.getName())).setMetricD(meter.count())
+                .addAttributes(buildMetricTypeAttribute("meter"))
+                .build());
     }
 
     @Override
