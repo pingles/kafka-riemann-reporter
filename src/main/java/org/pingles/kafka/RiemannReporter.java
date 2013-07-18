@@ -39,19 +39,6 @@ public class RiemannReporter extends AbstractPollingReporter implements MetricPr
         }
     }
 
-    private Proto.Event.Builder buildEvent(String serviceLabel) {
-        Proto.Event.Builder builder = Proto.Event.newBuilder();
-        try {
-            builder.setHost(InetAddress.getLocalHost().getCanonicalHostName());
-            builder.setTime(currentTime());
-            builder.setService(serviceLabel);
-            builder.addTags("kafkabroker");
-        } catch (UnknownHostException e) {
-            LOGGER.error("Couldn't determine current host", e);
-        }
-        return builder;
-    }
-
     @Override
     public void processMeter(MetricName name, Metered meter, Metric context) throws Exception {
         Proto.Event.Builder builder = buildEvent(String.format("%s mean", name.getName()));
@@ -105,6 +92,19 @@ public class RiemannReporter extends AbstractPollingReporter implements MetricPr
             Proto.Event event = builder.setMetricSint64(longValue).build();
             sendEvent(event);
         }
+    }
+
+    private Proto.Event.Builder buildEvent(String serviceLabel) {
+        Proto.Event.Builder builder = Proto.Event.newBuilder();
+        try {
+            builder.setHost(InetAddress.getLocalHost().getHostName());
+            builder.setTime(currentTime());
+            builder.setService(serviceLabel);
+            builder.addTags("kafkabroker");
+        } catch (UnknownHostException e) {
+            LOGGER.error("Couldn't determine current host", e);
+        }
+        return builder;
     }
 
     private Proto.Attribute buildMetricTypeAttribute(String type) {
