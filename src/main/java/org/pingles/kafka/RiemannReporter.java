@@ -17,6 +17,7 @@ public class RiemannReporter extends AbstractPollingReporter implements MetricPr
     private static final Logger LOGGER = Logger.getLogger(RiemannReporter.class);
     private final Clock clock;
     private final RiemannEventPublisher publisher;
+    private long currentTime = 0L;
 
     public RiemannReporter(Clock clock, RiemannEventPublisher publisher) {
         super(Metrics.defaultRegistry(), "riemann-reporter");
@@ -26,7 +27,8 @@ public class RiemannReporter extends AbstractPollingReporter implements MetricPr
 
     @Override
     public void run() {
-        currentTime();
+        this.currentTime = currentTime();
+
         final Set<Map.Entry<MetricName, Metric>> metrics = getMetricsRegistry().allMetrics().entrySet();
         for (Map.Entry<MetricName, Metric> metricEntry : metrics) {
             MetricName name = metricEntry.getKey();
@@ -110,7 +112,7 @@ public class RiemannReporter extends AbstractPollingReporter implements MetricPr
         Proto.Event.Builder builder = Proto.Event.newBuilder();
         try {
             builder.setHost(InetAddress.getLocalHost().getHostName());
-            builder.setTime(currentTime());
+            builder.setTime(currentTime);
             builder.setService(serviceLabel);
             builder.addTags("kafkabroker");
         } catch (UnknownHostException e) {
