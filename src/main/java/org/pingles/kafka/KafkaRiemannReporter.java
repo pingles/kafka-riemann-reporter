@@ -15,8 +15,6 @@ public class KafkaRiemannReporter implements KafkaRiemannReporterMBean, KafkaMet
     private final Object lock = new Object();
     private static final Logger LOGGER = Logger.getLogger(KafkaRiemannReporter.class);
     private RiemannReporter reporter;
-    private AbstractRiemannClient riemannClient;
-
     public KafkaRiemannReporter() {
     }
 
@@ -33,14 +31,12 @@ public class KafkaRiemannReporter implements KafkaRiemannReporterMBean, KafkaMet
     private void initialize(VerifiableProperties props) {
         KafkaMetricsConfig metricsConfig = new KafkaMetricsConfig(props);
         try {
-            String host = props.getString("kafka.riemann.metrics.reporter.host", "127.0.0.1");
-            Integer port = props.getInt("kafka.riemann.metrics.reporter.port", 5555);
-            riemannClient = RiemannClient.tcp(host, port);
+            RiemannEventPublisher publisher = RiemannTcpClientPublisher.buildFromProperties(props);
+            reporter = new RiemannReporter(Clock.defaultClock(), publisher);
+            startReporter(metricsConfig.pollingIntervalSecs());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        reporter = new RiemannReporter(Clock.defaultClock(), riemannClient);
-        startReporter(metricsConfig.pollingIntervalSecs());
     }
 
     private boolean isEnabled(VerifiableProperties props) {
@@ -50,24 +46,11 @@ public class KafkaRiemannReporter implements KafkaRiemannReporterMBean, KafkaMet
     @Override
     public void startReporter(long pollingPeriodInSeconds) {
         LOGGER.info(String.format("Starting Riemann metrics reporter, polling every %d seconds", pollingPeriodInSeconds));
-        try {
-            riemannClient.connect();
-
-            reporter.start(pollingPeriodInSeconds, TimeUnit.SECONDS);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        reporter.start(pollingPeriodInSeconds, TimeUnit.SECONDS);
     }
 
     @Override
     public void stopReporter() {
-        if (riemannClient != null && riemannClient.isConnected()) {
-            try {
-                riemannClient.disconnect();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     @Override

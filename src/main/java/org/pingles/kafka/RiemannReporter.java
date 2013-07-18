@@ -16,12 +16,12 @@ import java.util.concurrent.TimeUnit;
 public class RiemannReporter extends AbstractPollingReporter implements MetricProcessor<Metric> {
     private static final Logger LOGGER = Logger.getLogger(RiemannReporter.class);
     private final Clock clock;
-    private final AbstractRiemannClient riemann;
+    private final RiemannEventPublisher publisher;
 
-    public RiemannReporter(Clock clock, AbstractRiemannClient riemann) {
+    public RiemannReporter(Clock clock, RiemannEventPublisher publisher) {
         super(Metrics.defaultRegistry(), "riemann-reporter");
         this.clock = clock;
-        this.riemann = riemann;
+        this.publisher = publisher;
     }
 
     @Override
@@ -84,7 +84,7 @@ public class RiemannReporter extends AbstractPollingReporter implements MetricPr
     }
 
     private void sendEvent(Proto.Event event) throws IOException {
-        riemann.sendEventsWithAck(event);
+        publisher.publish(event);
     }
 
     private long currentTime() {
