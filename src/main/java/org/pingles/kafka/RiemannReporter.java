@@ -45,6 +45,7 @@ public class RiemannReporter extends AbstractPollingReporter implements MetricPr
             builder.setHost(InetAddress.getLocalHost().getCanonicalHostName());
             builder.setTime(currentTime());
             builder.setService(serviceLabel);
+            builder.addTags("kafkabroker");
         } catch (UnknownHostException e) {
             LOGGER.error("Couldn't determine current host", e);
         }
