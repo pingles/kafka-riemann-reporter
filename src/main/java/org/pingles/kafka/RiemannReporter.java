@@ -48,6 +48,16 @@ public class RiemannReporter extends AbstractPollingReporter implements MetricPr
         sendEvent(buildEvent(String.format("%s count", name.getName())).setMetricD(meter.count())
                 .addAttributes(buildMetricTypeAttribute("meter"))
                 .build());
+
+        sendEvent(buildEvent(String.format("%s oneMinute", name.getName())).setMetricD(meter.oneMinuteRate())
+                .addAttributes(buildMetricTypeAttribute("meter"))
+                .build());
+        sendEvent(buildEvent(String.format("%s fiveMinute", name.getName())).setMetricD(meter.fiveMinuteRate())
+                .addAttributes(buildMetricTypeAttribute("meter"))
+                .build());
+        sendEvent(buildEvent(String.format("%s fifteenMinute", name.getName())).setMetricD(meter.fifteenMinuteRate())
+                .addAttributes(buildMetricTypeAttribute("meter"))
+                .build());
     }
 
     @Override
