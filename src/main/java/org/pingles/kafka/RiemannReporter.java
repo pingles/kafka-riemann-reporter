@@ -59,17 +59,23 @@ public class RiemannReporter extends AbstractPollingReporter implements MetricPr
 
     @Override
     public void processCounter(MetricName name, Counter counter, Metric context) throws Exception {
-        LOGGER.warn(String.format("Ignoring counter: %s", name.getName()));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(String.format("Ignoring counter: %s", name.getName()));
+        }
     }
 
     @Override
     public void processHistogram(MetricName name, Histogram histogram, Metric context) throws Exception {
-        LOGGER.warn(String.format("Ignoring histogram: %s", name.getName()));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(String.format("Ignoring histogram: %s", name.getName()));
+        }
     }
 
     @Override
     public void processTimer(MetricName name, Timer timer, Metric context) throws Exception {
-        LOGGER.warn(String.format("Ignoring timer: %s", name.getName()));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(String.format("Ignoring timer: %s", name.getName()));
+        }
     }
 
     @Override
