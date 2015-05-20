@@ -1,11 +1,11 @@
 package org.pingles.kafka;
 
 import com.aphyr.riemann.Proto;
-import com.aphyr.riemann.client.AbstractRiemannClient;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.*;
 import com.yammer.metrics.reporting.AbstractPollingReporter;
 import org.apache.log4j.Logger;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
