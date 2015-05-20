@@ -1,11 +1,11 @@
 package org.pingles.kafka;
 
 import com.aphyr.riemann.Proto;
-import com.aphyr.riemann.client.AbstractRiemannClient;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.*;
 import com.yammer.metrics.reporting.AbstractPollingReporter;
 import org.apache.log4j.Logger;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -101,11 +101,16 @@ public class RiemannReporter extends AbstractPollingReporter implements MetricPr
         if (gauge.value() instanceof Double) {
             Proto.Event event = builder.setMetricD((Double) gauge.value()).build();
             sendEvent(event);
-        } else {
+        } else if (gauge.value() instanceof Long || gauge.value() instanceof Integer) {
             Long longValue = Long.valueOf(gauge.value().toString());
             Proto.Event event = builder.setMetricSint64(longValue).build();
             sendEvent(event);
+        } else {
+            String value = gauge.value().toString();
+            Proto.Event event = builder.setState(value).build();
+            sendEvent(event);
         }
+
     }
 
     private Proto.Event.Builder buildEvent(String serviceLabel) {

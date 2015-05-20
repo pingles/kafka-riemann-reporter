@@ -15,6 +15,7 @@ public class KafkaRiemannReporter implements KafkaRiemannReporterMBean, KafkaMet
     private final Object lock = new Object();
     private static final Logger LOGGER = Logger.getLogger(KafkaRiemannReporter.class);
     private RiemannReporter reporter;
+
     public KafkaRiemannReporter() {
     }
 
@@ -31,26 +32,12 @@ public class KafkaRiemannReporter implements KafkaRiemannReporterMBean, KafkaMet
     private void initialize(VerifiableProperties props) {
         KafkaMetricsConfig metricsConfig = new KafkaMetricsConfig(props);
         try {
-            RiemannEventPublisher publisher = createPublisher(props);
+            RiemannEventPublisher publisher = RiemannTcpClientPublisher.buildFromProperties(props);
             reporter = new RiemannReporter(Clock.defaultClock(), publisher);
             startReporter(metricsConfig.pollingIntervalSecs());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private RiemannEventPublisher createPublisher(VerifiableProperties props) throws IOException {
-        String publisherType = props.getString("kafka.riemann.metrics.reporter.publisher");
-        if (publisherType.equals("riemann")) {
-            LOGGER.info("Connecting directly to Riemann");
-            return RiemannTcpClientPublisher.buildFromProperties(props);
-        }
-        if (publisherType.equals("kafka")) {
-            LOGGER.info("Sending Riemann events via. Kafka topic");
-            return KafkaPublisher.buildFromProperties(props);
-        }
-        LOGGER.error(String.format("Invalid kafka.riemann.metrics.reporter.publisher setting: %s", publisherType));
-        throw new RuntimeException("Didn't recognise kafka.riemann.metrics.reporter.publisher type.");
     }
 
     private boolean isEnabled(VerifiableProperties props) {
